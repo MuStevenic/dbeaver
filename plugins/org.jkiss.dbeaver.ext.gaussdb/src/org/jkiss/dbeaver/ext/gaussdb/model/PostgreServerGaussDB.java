@@ -17,9 +17,13 @@
 
 package org.jkiss.dbeaver.ext.gaussdb.model;
 
+import org.jkiss.dbeaver.ext.postgresql.model.PostgreClass;
 import org.jkiss.dbeaver.ext.postgresql.model.PostgreDataSource;
 import org.jkiss.dbeaver.ext.postgresql.model.PostgreDatabase;
+import org.jkiss.dbeaver.ext.postgresql.model.PostgreSchema;
+import org.jkiss.dbeaver.ext.postgresql.model.PostgreTableBase;
 import org.jkiss.dbeaver.ext.postgresql.model.impls.PostgreServerExtensionBase;
+import org.jkiss.dbeaver.model.exec.jdbc.JDBCResultSet;
 
 public class PostgreServerGaussDB extends PostgreServerExtensionBase {
 
@@ -61,5 +65,15 @@ public class PostgreServerGaussDB extends PostgreServerExtensionBase {
     @Override
     public PostgreDatabase.SchemaCache createSchemaCache(PostgreDatabase database) {
         return new GaussDBSchemaCache();
+    }
+
+    @Override
+    public PostgreTableBase createRelationOfClass(PostgreSchema schema, PostgreClass.RelKind kind, JDBCResultSet dbResult) {
+        if (kind == PostgreClass.RelKind.S) {
+            return new GaussDBSequence(schema, dbResult);
+        } else if (kind == PostgreClass.RelKind.r) {
+            return new GaussDBTableRegular(schema, dbResult);
+        }
+        return super.createRelationOfClass(schema, kind, dbResult);
     }
 }
